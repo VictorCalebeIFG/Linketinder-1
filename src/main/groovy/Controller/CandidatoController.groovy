@@ -3,17 +3,18 @@ package Controller
 import DAO.ConexaoDAO
 import DAO.CandidatoDAO
 import Model.CandidatoModel
+import jakarta.servlet.ServletException
+import jakarta.servlet.annotation.WebServlet
+import jakarta.servlet.http.HttpServlet
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 
 import java.sql.Connection
 
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
 
-import javax.servlet.ServletException
-import javax.servlet.annotation.WebServlet
-import javax.servlet.http.HttpServlet
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
+
 import com.google.gson.Gson
 
 @WebServlet("/candidato")
@@ -23,19 +24,11 @@ class CandidatoController extends HttpServlet{
 
     CandidatoDAO candidatoDao = new CandidatoDAO()
 
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        try {
-            List<CandidatoModel> candidatos = candidatoDao.listarCandidatos()
-
-            String jsonCandidatos = convertToJSON(candidatos);
-
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-            response.getWriter().write(jsonCandidatos);
-        } catch (Exception e) {
-            e.printStackTrace();
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Erro ao obter a lista de candidatos.");
-        }
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        List<CandidatoModel> candidatos = candidatoDao.listarCandidatos()
+        String jsonCandidatos = convertToJSON(candidatos);
+        ApiUtil.sendJsonResponse(resp,jsonCandidatos)
     }
 
     private static String convertToJSON(List<CandidatoModel> candidatos) {
