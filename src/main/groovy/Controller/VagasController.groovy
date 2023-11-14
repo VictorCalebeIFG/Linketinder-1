@@ -3,14 +3,17 @@ package Controller
 import DAO.VagasDAO
 import Model.VagasModel
 import DAO.ConexaoDAO
+import com.fasterxml.jackson.databind.JsonNode
+import jakarta.servlet.ServletException
+import jakarta.servlet.annotation.WebServlet
+import jakarta.servlet.http.HttpServlet
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import java.sql.Connection
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
-import javax.servlet.ServletException
-import javax.servlet.annotation.WebServlet
-import javax.servlet.http.HttpServlet
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
+
+
 import com.google.gson.Gson
 
 @WebServlet("/vaga")
@@ -20,19 +23,11 @@ class VagasController extends HttpServlet{
 
     VagasDAO vagasDao = new VagasDAO()
 
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        try {
-            List<VagasModel> vagas = vagasDao.listarVagas()
-
-            String jsonVagas = convertToJSON(vagas);
-
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-            response.getWriter().write(jsonVagas);
-        } catch (Exception e) {
-            e.printStackTrace();
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Erro ao obter a lista de vagas.");
-        }
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        List<VagasModel> vagas = vagasDao.listarVagas()
+        String jsonVagas = convertToJSON(vagas);
+        ApiUtil.sendJsonResponse(resp,jsonVagas)
     }
 
     private static String convertToJSON(List<VagasModel> vagas) {
@@ -45,27 +40,12 @@ class VagasController extends HttpServlet{
         }
     }
 
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) {
-        try {
-            String corpoRequisicao = request.getReader().lines().collect(java.util.stream.Collectors.joining(System.lineSeparator()));
-
-            ObjectMapper objectMapper = new ObjectMapper();
-            VagasModel vaga = objectMapper.readValue(corpoRequisicao, VagasModel.class);
-
-            int vagaId = cadastrarVaga(vaga);
-
-            if (vagaId != -1) {
-                response.setStatus(HttpServletResponse.SC_CREATED);
-                response.getWriter().write("Vaga inserida com sucesso");
-            } else {
-                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                response.getWriter().write("Erro ao inserir vaga");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write("Erro ao inserir vaga");
-        }
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        JsonNode json = ApiUtil.readJsonRequestBody(req)
+        List<String> dados = ApiUtil.extractValuesFromJson(json)
+        VagasModel vaga = new VagasModel (dados[0],dados[1], dados[2] as double, dados[3] as int, dados[4], dados[5] as ArrayList<String>)
+        VagasDAO.inserirVagasNoBanco(vaga)
     }
 
 

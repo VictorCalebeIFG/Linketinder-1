@@ -1,31 +1,29 @@
 package Controller
 
-import DAO.CandidatoDAO
 import DAO.EmpresaDAO
-import Model.CandidatoModel
 import Model.EmpresaModel
-import DAO.ConexaoDAO
 import com.fasterxml.jackson.databind.JsonNode
-
+import jakarta.servlet.ServletException
+import jakarta.servlet.annotation.WebServlet
+import jakarta.servlet.http.HttpServlet
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import java.sql.Connection
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
-import javax.servlet.ServletException
-import javax.servlet.annotation.WebServlet
-import javax.servlet.http.HttpServlet
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
+
+
 import com.google.gson.Gson
 
 @WebServlet("/empresa")
-class EmpresaController extends jakarta.servlet.http.HttpServlet{
+class EmpresaController extends HttpServlet{
     private static final long serialVersionUID = 1L
     private Gson gson = new Gson()
 
     EmpresaDAO empresaDao = new EmpresaDAO()
 
     @Override
-    protected void doGet(jakarta.servlet.http.HttpServletRequest req, jakarta.servlet.http.HttpServletResponse resp) throws jakarta.servlet.ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         List<EmpresaModel> empresas = empresaDao.listarEmpresas()
         String jsonEmpresas = convertToJSON(empresas);
         ApiUtil.sendJsonResponse(resp,jsonEmpresas)
@@ -42,7 +40,7 @@ class EmpresaController extends jakarta.servlet.http.HttpServlet{
     }
 
     @Override
-    protected void doPost(jakarta.servlet.http.HttpServletRequest req, jakarta.servlet.http.HttpServletResponse resp) throws jakarta.servlet.ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         JsonNode json = ApiUtil.readJsonRequestBody(req)
         List<String> dados = ApiUtil.extractValuesFromJson(json)
         EmpresaDAO.inserirEmpresaNoBanco(dados[0],dados[1],dados[2],dados[3], dados[4])
