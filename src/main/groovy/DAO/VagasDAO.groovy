@@ -75,6 +75,33 @@ class VagasDAO {
             return -1
         }
 
+    static int inserirVagasNoBanco(String nome,String desc,Double salario, Integer idEmpresa) {
+
+        Connection con = ConexaoDAO.getInstance().getConnection()
+        try {
+            PreparedStatement stmtVaga = con.prepareStatement(SQL_INSERIR_VAGAS, Statement.RETURN_GENERATED_KEYS)
+            stmtVaga.setString(1, nome)
+            stmtVaga.setString(2, desc)
+            stmtVaga.setDouble(3, salario)
+            stmtVaga.setInt(4, idEmpresa)
+
+            int rowsAffected = stmtVaga.executeUpdate()
+            if (rowsAffected > 0) {
+                ResultSet generatedKeys = stmtVaga.getGeneratedKeys()
+                int vagaId = -1
+
+                if (generatedKeys.next()) {
+                    vagaId = generatedKeys.getInt(1)
+                }
+
+                return vagaId
+            }
+        } catch (SQLException e) {
+            DatabaseUtilDAO.handleSQLException(e)
+        }
+        return -1
+    }
+
         static void listarTodasCompetencias() {
             try {
                 DatabaseUtilDAO.listarTodasCompetencias()

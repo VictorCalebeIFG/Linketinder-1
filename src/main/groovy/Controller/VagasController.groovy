@@ -44,8 +44,7 @@ class VagasController extends HttpServlet{
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         JsonNode json = ApiUtil.readJsonRequestBody(req)
         List<String> dados = ApiUtil.extractValuesFromJson(json)
-        VagasModel vaga = new VagasModel (dados[0],dados[1], dados[2] as double, dados[3] as int, dados[4], dados[5] as ArrayList<String>)
-        VagasDAO.inserirVagasNoBanco(vaga)
+        VagasDAO.inserirVagasNoBanco(dados[0],dados[1], dados[2] as Double, dados[3] as Integer)
     }
 
 
