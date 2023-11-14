@@ -3,6 +3,7 @@ package Controller
 import DAO.ConexaoDAO
 import DAO.CandidatoDAO
 import Model.CandidatoModel
+import com.fasterxml.jackson.databind.JsonNode
 import jakarta.servlet.ServletException
 import jakarta.servlet.annotation.WebServlet
 import jakarta.servlet.http.HttpServlet
@@ -41,29 +42,12 @@ class CandidatoController extends HttpServlet{
         }
     }
 
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) {
-        try {
-            String corpoRequisicao = request.getReader().lines().collect(java.util.stream.Collectors.joining(System.lineSeparator()));
-
-            ObjectMapper objectMapper = new ObjectMapper();
-            CandidatoModel candidato = objectMapper.readValue(corpoRequisicao, CandidatoModel.class);
-
-            boolean sucesso = cadastrarCandidato(candidato);
-
-            if (sucesso) {
-                response.setStatus(HttpServletResponse.SC_CREATED);
-                response.getWriter().write("Candidato inserido com sucesso");
-            } else {
-                response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                response.getWriter().write("Erro ao inserir candidato");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.getWriter().write("Erro ao inserir candidato");
-        }
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        JsonNode json = ApiUtil.readJsonRequestBody(req)
+        List<String> dados = ApiUtil.extractValuesFromJson(json)
+        CandidatoDAO.inserirCandidatoNoBanco(dados[0],dados[1],dados[2],dados[3], dados[4] as long,dados[5])
     }
-
 
     static boolean cadastrarCandidato(CandidatoModel candidato, Scanner scanner) {
         Connection con = ConexaoDAO.getInstance().getConnection()
